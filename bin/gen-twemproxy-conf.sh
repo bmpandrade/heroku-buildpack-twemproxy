@@ -18,6 +18,7 @@ do
 
   NEW_URL=redis://${DB_USER}:${DB_PASS}@127.0.0.1:620${n}
   export ${REDIS_URL}_TWEMPROXY=${NEW_URL}
+  export ${REDIS_URL}_UNPROXIED=${REDIS_URL_VALUE}
   echo "Pointing to ${DB_HOST}:${DB_PORT}"
 
   cat >> /app/vendor/twemproxy/twemproxy.yml << EOFEOF
