@@ -71,9 +71,9 @@ config-gen() {
   # Overwrite config vars with twemproxy targets
   REDIS_URLS=${TWEMPROXY_URLS:-REDISCLOUD_URL}
 
-  for REDIS_URL in $REDIS_URLS; do
-    at "config-gen-override $REDIS_URL"
-    eval "$REDIS_URL=\$${REDIS_URL}_TWEMPROXY"
+  for _REDIS_URL in $REDIS_URLS; do
+    at "config-gen-override $_REDIS_URL"
+    eval "$_REDIS_URL=\$${_REDIS_URL}_TWEMPROXY"
   done
 }
 
