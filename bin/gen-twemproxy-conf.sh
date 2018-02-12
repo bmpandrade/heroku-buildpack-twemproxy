@@ -3,10 +3,12 @@
 REDIS_URLS=${TWEMPROXY_URLS:-REDISCLOUD_URL}
 n=1
 
-for REDIS_URL in $REDIS_URLS
+rm -f /app/vendor/twemproxy/twemproxy.yml
+
+for _REDIS_URL in $REDIS_URLS
 do
-  echo "Setting ${REDIS_URL}_TWEMPROXY config var"
-  eval REDIS_URL_VALUE=\$$REDIS_URL
+  echo "Setting ${_REDIS_URL}_TWEMPROXY config var"
+  eval REDIS_URL_VALUE=\$$_REDIS_URL
 
   DB=$(echo ${REDIS_URL_VALUE} | perl -lne 'print "$1 $2 $3 $4 $5 $6" if /^redis(?:ql)?:\/\/([^:]+):([^@]+)@(.*?):(.*?)(\\?.*)?$/')
   DB_URI=( $DB )
@@ -16,16 +18,18 @@ do
   DB_PORT=${DB_URI[3]}
 
   NEW_URL=redis://${DB_USER}:${DB_PASS}@127.0.0.1:620${n}
-  export ${REDIS_URL}_TWEMPROXY=${NEW_URL}
+  export ${_REDIS_URL}_TWEMPROXY=${NEW_URL}
+  export ${_REDIS_URL}_UNPROXIED=${REDIS_URL_VALUE}
   echo "Pointing to ${DB_HOST}:${DB_PORT}"
 
   cat >> /app/vendor/twemproxy/twemproxy.yml << EOFEOF
-${REDIS_URL}:
+${_REDIS_URL}:
   listen: 127.0.0.1:620${n}
   redis: true
   redis_auth: ${DB_PASS}
   servers:
    - ${DB_HOST}:${DB_PORT}:1
+  timeout: 30000
 EOFEOF
 
   let "n += 1"
